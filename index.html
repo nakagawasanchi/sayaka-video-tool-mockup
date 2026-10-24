@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<script>(function(){var H="3e3c5ce6ffaf32a0f91746c8f420e623e9bd0e922acf71060ef364a726e72296",K="mk_ok";try{if(sessionStorage.getItem(K)==="1")return}catch(e){}
+document.documentElement.style.visibility="hidden";
+function ui(){var d=document.createElement("div");d.style.cssText="position:fixed;inset:0;z-index:99999;background:#fbf4f6;display:flex;align-items:center;justify-content:center;visibility:visible;font-family:sans-serif";
+d.innerHTML='<form style="background:#fff;padding:32px;border-radius:20px;box-shadow:0 8px 30px rgba(217,116,143,.25);text-align:center"><div style="color:#8c7a86;margin-bottom:12px">合言葉を入力してください</div><input type="password" id="pw" style="font-size:16px;padding:10px;border:1px solid #f0dde4;border-radius:10px"><div id="er" style="color:#c75a79;font-size:13px;min-height:20px;margin:6px"></div><button style="background:#d9748f;color:#fff;border:0;border-radius:10px;padding:10px 28px;font-size:15px">開く</button></form>';
+document.body.appendChild(d);document.documentElement.style.visibility="visible";
+d.querySelector("form").onsubmit=function(e){e.preventDefault();var v=d.querySelector("#pw").value;
+crypto.subtle.digest("SHA-256",new TextEncoder().encode(v)).then(function(b){var x=Array.from(new Uint8Array(b)).map(function(n){return n.toString(16).padStart(2,"0")}).join("");
+if(x===H){try{sessionStorage.setItem(K,"1")}catch(e){}d.remove()}else d.querySelector("#er").textContent="違います"})}}
+if(document.body)ui();else document.addEventListener("DOMContentLoaded",ui);
+})();</script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI動画編集アシスタント（モックアップ）</title>
+<style>
+  :root{
+    --bg:#fbf4f6; --card:#ffffff; --ink:#3b2f3a; --sub:#8c7a86; --line:#f0dde4;
+    --rose:#d9748f; --rose-deep:#c75a79; --rose-soft:#fdeef2; --lav:#b79be0; --lav-soft:#f3edfb;
+    --ok:#5fb08d; --ok-soft:#e8f6ee; --gold:#e8c27a; --warn:#e0a24a; --warn-soft:#fdf3e3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:
+      radial-gradient(900px 500px at -10% -10%, #fde3ea 0%, transparent 60%),
+      radial-gradient(800px 500px at 110% 10%, #ece4fb 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN",-apple-system,sans-serif;font-size:14px;line-height:1.7}
+  button{font-family:inherit}
+  header{height:64px;background:rgba(255,255,255,.82);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 32px;gap:14px;position:sticky;top:0;z-index:5}
+  .logo{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#f3a4ba,#b79be0);display:grid;place-items:center;color:#fff;font-size:17px;box-shadow:0 4px 12px rgba(217,116,143,.35);cursor:pointer}
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.04em;cursor:pointer}
+  header h1 small{font-weight:400;color:var(--sub);font-size:12px;margin-left:10px;letter-spacing:.1em}
+  nav{display:flex;gap:4px;margin-left:22px}
+  nav a{padding:7px 14px;border-radius:999px;color:var(--sub);font-size:13px;cursor:pointer;text-decoration:none}
+  nav a.on{background:var(--rose-soft);color:var(--rose-deep);font-weight:700}
+  header .usage{margin-left:auto;font-size:12px;color:var(--sub);display:flex;align-items:center;gap:8px}
+  header .usage .um{width:90px;height:6px;background:#f5e6eb;border-radius:6px;overflow:hidden}
+  header .usage .um i{display:block;height:100%;width:30%;background:linear-gradient(90deg,var(--rose),var(--lav))}
+  header .plan{font-size:12px;color:var(--rose-deep);background:var(--rose-soft);padding:6px 14px;border-radius:999px;display:flex;align-items:center;gap:7px;cursor:pointer}
+  .hide{display:none!important}
+  .steps{display:flex;justify-content:center;margin:28px auto 22px;max-width:860px}
+  .step{flex:1;display:flex;align-items:center;gap:10px;position:relative;padding:0 6px;cursor:pointer}
+  .step .n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;background:#fff;border:2px solid var(--line);color:var(--sub);flex:none}
+  .step .t{font-size:13px;color:var(--sub);white-space:nowrap}
+  .step.done .n{background:var(--ok);border-color:var(--ok);color:#fff}
+  .step.done .t{color:var(--ink)}
+  .step.now .n{background:linear-gradient(135deg,var(--rose),var(--lav));border-color:transparent;color:#fff;box-shadow:0 4px 12px rgba(217,116,143,.35)}
+  .step.now .t{color:var(--rose-deep);font-weight:700}
+  .step:not(:last-child)::after{content:"";flex:1;height:2px;background:var(--line);margin:0 8px;border-radius:2px}
+  .step.done:not(:last-child)::after{background:var(--ok)}
+  main{max-width:1180px;margin:0 auto;padding:0 32px 44px;display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start}
+  main.one{grid-template-columns:1fr;max-width:760px}
+  main.wide{grid-template-columns:1fr;max-width:1180px}
+  main.top{padding-top:28px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 10px 30px rgba(217,116,143,.08)}
+  .card h2{font-size:15px;margin:0 0 14px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .card h2 small{font-weight:400;color:var(--sub);font-size:12px;margin-left:auto}
+  .thumbwrap{display:grid;place-items:center;padding:6px 0 2px}
+  .thumb{width:212px;aspect-ratio:9/16;border-radius:18px;position:relative;overflow:hidden;display:grid;place-items:center;box-shadow:0 12px 28px rgba(59,47,58,.18);border:4px solid #fff;background:#eee}
+  .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .thumb .play{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;z-index:1;box-shadow:0 6px 16px rgba(0,0,0,.18);cursor:pointer}
+  .thumb .play::after{content:"";border-left:18px solid var(--rose-deep);border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:5px}
+  .thumb .dur{position:absolute;right:10px;bottom:10px;background:rgba(59,47,58,.65);color:#fff;font-size:11px;padding:3px 8px;border-radius:999px;z-index:1}
+  .thumb .tag{position:absolute;left:10px;top:10px;background:rgba(255,255,255,.9);color:var(--rose-deep);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;z-index:1}
+  .thumb .telop{position:absolute;left:10px;right:10px;bottom:44px;z-index:1;text-align:center;font-weight:700;font-size:13px;line-height:1.5;padding:4px 6px;border-radius:8px}
+  .telop.s-white{color:#fff;text-shadow:0 0 3px #d9748f,0 0 3px #d9748f,0 0 4px #d9748f,0 0 5px #d9748f,0 1px 2px rgba(0,0,0,.4)}
+  .telop.s-yellow{color:#fff27a;text-shadow:0 0 3px #000,0 0 4px #000,0 1px 2px #000}
+  .telop.s-simple{color:#fff;background:rgba(59,47,58,.55)}
+  .thumb .scrub{position:absolute;left:12px;right:12px;bottom:14px;height:4px;background:rgba(255,255,255,.5);border-radius:4px;z-index:1}
+  .thumb .scrub i{display:block;height:100%;width:30%;background:#fff;border-radius:4px;position:relative}
+  .thumb .scrub i::after{content:"";position:absolute;right:-6px;top:-4px;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px rgba(217,116,143,.5)}
+  .fname{margin:14px 0 2px;font-weight:700;font-size:14px;word-break:break-all;text-align:center}
+  .meta{color:var(--sub);font-size:12px;text-align:center}
+  .okbadge{display:flex;width:max-content;margin:12px auto 0;align-items:center;gap:6px;background:var(--ok-soft);color:var(--ok);font-weight:700;font-size:12px;padding:5px 12px;border-radius:999px}
+  .okbadge::before{content:"✓"}
+  .ghost{margin-top:14px;width:100%;padding:10px;border:1.5px dashed #e9c9d3;border-radius:12px;background:#fff;color:var(--sub);font-size:13px;text-align:center;cursor:pointer}
+  .lead{color:var(--sub);font-size:13px;margin:-6px 0 16px}
+  .opts{display:grid;gap:12px}
+  .opt{display:grid;grid-template-columns:40px 44px 1fr auto;gap:16px;align-items:center;border:1.5px solid var(--line);border-radius:18px;padding:16px 18px;background:#fff;transition:.2s;cursor:pointer;user-select:none}
+  .opt.on{border-color:#efc3cf;background:linear-gradient(135deg,#fff5f8,#f8f3fd);box-shadow:0 6px 18px rgba(217,116,143,.12)}
+  .cb{width:36px;height:36px;border-radius:12px;border:2px solid #e3c9d2;background:#fff;position:relative;display:grid;place-items:center;box-shadow:inset 0 2px 4px rgba(217,116,143,.08);transition:.2s;flex:none}
+  .cb::before{content:"";width:14px;height:14px;border-radius:50%;background:#f5e6eb;opacity:.9}
+  .opt.on .cb,.cb.on{border-color:transparent;background:linear-gradient(135deg,#f08aa6,#b79be0);box-shadow:0 6px 14px rgba(217,116,143,.4)}
+  .opt.on .cb::before,.cb.on::before{display:none}
+  .opt.on .cb::after,.cb.on::after{content:"";width:9px;height:17px;border:solid #fff;border-width:0 3.5px 3.5px 0;border-radius:2px;transform:translateY(-2px) rotate(45deg)}
+  .cb .spark{position:absolute;right:-6px;top:-7px;font-size:13px;color:var(--gold);text-shadow:0 0 6px #fff;display:none}
+  .opt.on .cb .spark,.cb.on .spark{display:block}
+  .cb.sm{width:28px;height:28px;border-radius:9px}
+  .cb.sm::after{width:7px;height:13px;border-width:0 3px 3px 0}
+  .ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:21px;background:#f6eff3}
+  .opt.on .ico{background:#fff;box-shadow:0 2px 8px rgba(217,116,143,.15)}
+  .opt .name{font-weight:700;font-size:15.5px}
+  .opt .desc{color:var(--sub);font-size:12.5px}
+  .opt .time{font-size:12px;color:var(--sub);white-space:nowrap}
+  .opt.on .time{color:var(--rose-deep);font-weight:700}
+  .sub{grid-column:2/-1;margin-top:6px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12.5px}
+  .sub .lab,.lab{color:var(--sub)}
+  .chip{padding:5px 13px;border-radius:999px;border:1.5px solid #ead4dc;background:#fff;color:var(--ink);cursor:pointer;white-space:nowrap}
+  .chip.sel{background:linear-gradient(135deg,var(--rose),#c98ad6);border-color:transparent;color:#fff;font-weight:700;box-shadow:0 3px 10px rgba(217,116,143,.3)}
+  .chip.sm{padding:3px 10px;font-size:11.5px}
+  .inp{flex:1;min-width:220px;padding:9px 13px;border:1.5px solid #ead4dc;border-radius:10px;background:#fff;color:var(--ink);font:inherit;outline:none}
+  .inp:focus{border-color:var(--rose);box-shadow:0 0 0 3px rgba(217,116,143,.15)}
+  .bar{margin-top:18px;display:flex;align-items:center;gap:18px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:18px 22px;box-shadow:0 10px 30px rgba(217,116,143,.08)}
+  .bar .sum{font-size:13px;color:var(--sub);white-space:nowrap}
+  .bar .sum b{color:var(--ink);font-size:17px}
+  .bar .note{font-size:12px;color:var(--sub);margin-left:auto;text-align:right;line-height:1.5;white-space:nowrap}
+  .cta{background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-weight:700;font-size:16px;padding:15px 30px;border-radius:999px;white-space:nowrap;box-shadow:0 8px 22px rgba(217,116,143,.4);letter-spacing:.03em;border:0;cursor:pointer}
+  .cta.sm{font-size:13px;padding:9px 18px;box-shadow:0 4px 12px rgba(217,116,143,.3)}
+  .cta.block{width:100%}
+  .btn{background:#fff;border:1.5px solid #ead4dc;color:var(--rose-deep);font-weight:700;font-size:12.5px;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  .btn:hover{background:var(--rose-soft)}
+  .btn.ghostb{color:var(--sub);font-weight:500}
+  .foot{text-align:center;color:#b39eaa;font-size:11.5px;margin-top:10px}
+  .screen{display:none}
+  .screen.on{display:block}
+  main:not(.one):not(.wide) .screen.on{grid-column:2}
+  /* ログイン */
+  .login{max-width:420px;margin:60px auto 0;text-align:center}
+  .login .logo{width:64px;height:64px;font-size:30px;margin:0 auto 14px}
+  .login h2{justify-content:center;font-size:20px;margin-bottom:4px}
+  .login p{color:var(--sub);font-size:13px;margin:0 0 20px}
+  .login .f{display:grid;gap:10px;text-align:left}
+  .login .f label{font-size:12px;color:var(--sub)}
+  .login .f .inp{width:100%;min-width:0}
+  .login .note{margin-top:14px;font-size:12px;color:var(--sub);background:var(--lav-soft);padding:10px 14px;border-radius:12px;line-height:1.6}
+  /* ホーム */
+  .hero{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;margin-bottom:20px}
+  .hero h2{font-size:22px;margin:0;letter-spacing:.02em}
+  .hero p{margin:4px 0 0;color:var(--sub);font-size:13px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .vcard{background:#fff;border:1.5px solid var(--line);border-radius:18px;overflow:hidden;cursor:pointer;transition:.2s}
+  .vcard:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(217,116,143,.14)}
+  .vcard .vt{height:210px;position:relative;background:#eee;display:grid;place-items:center}
+  .vcard .vt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .vcard .vt .st{position:absolute;left:8px;top:8px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.92);color:var(--ok);white-space:nowrap}
+  .vcard .vt .st.doing{color:var(--warn)}
+  .vcard .vt .st.new{color:var(--rose-deep)}
+  .vcard .vt .dur{position:absolute;right:8px;bottom:8px;background:rgba(59,47,58,.65);color:#fff;font-size:11px;padding:2px 7px;border-radius:999px}
+  .vcard .vb{padding:10px 12px}
+  .vcard .vb b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vcard .vb span{font-size:11.5px;color:var(--sub)}
+  .vcard.new{border-style:dashed;display:grid;place-items:center;min-height:270px;color:var(--rose-deep);font-weight:700;background:rgba(255,255,255,.6)}
+  .vcard.new div{text-align:center;font-size:13px}
+  .vcard.new div b{display:block;font-size:34px;line-height:1;margin-bottom:8px}
+  .stat{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0 0}
+  .stat .s{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px}
+  .stat .s small{color:var(--sub);font-size:12px;display:block}
+  .stat .s b{font-size:22px}
+  .stat .s .um{height:6px;background:#f5e6eb;border-radius:6px;overflow:hidden;margin-top:8px}
+  .stat .s .um i{display:block;height:100%;width:30%;background:linear-gradient(90deg,var(--rose),var(--lav))}
+  /* アップロード */
+  .drop{border:2px dashed #e9c9d3;border-radius:22px;background:rgba(255,255,255,.7);padding:46px 20px;text-align:center;cursor:pointer;transition:.2s}
+  .drop:hover,.drop.over{border-color:var(--rose);background:#fff}
+  .drop .big{font-size:46px;line-height:1;margin-bottom:10px}
+  .drop h3{margin:0 0 4px;font-size:17px}
+  .drop p{margin:0;color:var(--sub);font-size:12.5px}
+  .uprog{margin-top:18px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px 18px;display:none}
+  .uprog.on{display:block}
+  .uprog .pb{height:8px;background:#f5e6eb;border-radius:8px;overflow:hidden;margin-top:8px}
+  .uprog .pb i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--lav));transition:width .3s}
+  .hint{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+  .hint div{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font-size:12.5px;color:var(--sub)}
+  .hint div b{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}
+  /* 処理中 */
+  .proc{text-align:center;padding:30px 20px 24px}
+  .proc .ring{width:120px;height:120px;border-radius:50%;margin:0 auto 18px;background:conic-gradient(var(--rose) var(--p,0%),#f5e6eb 0);display:grid;place-items:center;position:relative}
+  .proc .ring::before{content:"";width:96px;height:96px;border-radius:50%;background:#fff;position:absolute}
+  .proc .ring b{position:relative;font-size:24px;color:var(--rose-deep)}
+  .proc h3{margin:0 0 4px;font-size:18px}
+  .proc p{color:var(--sub);margin:0 0 20px;font-size:13px}
+  .tasks{display:grid;gap:10px;max-width:520px;margin:0 auto;text-align:left}
+  .task{display:grid;grid-template-columns:32px 1fr auto;gap:12px;align-items:center;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:10px 14px}
+  .task .st{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:14px;background:#f6eff3;color:var(--sub)}
+  .task.doing .st{background:var(--rose-soft);color:var(--rose-deep);animation:pulse 1.2s infinite}
+  .task.done .st{background:var(--ok-soft);color:var(--ok)}
+  .task .pb{height:6px;background:#f5e6eb;border-radius:6px;margin-top:6px;overflow:hidden}
+  .task .pb i{display:block;height:100%;background:linear-gradient(90deg,var(--rose),var(--lav));width:0;transition:width .4s}
+  .task .lab{font-weight:700;font-size:13.5px;color:var(--ink)}
+  .task .pct{font-size:12px;color:var(--sub);min-width:36px;text-align:right}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,116,143,.4)}50%{box-shadow:0 0 0 8px rgba(217,116,143,0)}}
+  /* 結果タブ */
+  .tabs{display:flex;gap:6px;margin:-4px 0 16px;border-bottom:1.5px solid var(--line)}
+  .tab{padding:9px 16px;border-radius:12px 12px 0 0;color:var(--sub);cursor:pointer;font-weight:700;font-size:13.5px;border-bottom:3px solid transparent;margin-bottom:-1.5px}
+  .tab.on{color:var(--rose-deep);border-bottom-color:var(--rose)}
+  .tab .cnt{font-size:11px;background:var(--rose-soft);color:var(--rose-deep);padding:1px 7px;border-radius:999px;margin-left:5px}
+  .pane{display:none}.pane.on{display:block}
+  .scene{display:grid;grid-template-columns:36px 64px 1fr auto;gap:14px;align-items:center;border:1.5px solid var(--line);border-radius:16px;padding:12px 14px;background:#fff;margin-bottom:10px;cursor:pointer}
+  .scene.cur{border-color:#efc3cf;background:linear-gradient(135deg,#fff5f8,#f8f3fd)}
+  .scene .sth{width:64px;aspect-ratio:9/16;border-radius:10px;overflow:hidden;background:#ddd;position:relative}
+  .scene .sth img{width:100%;height:100%;object-fit:cover}
+  .scene .sth span{position:absolute;left:0;right:0;bottom:0;font-size:9px;color:#fff;background:rgba(0,0,0,.5);text-align:center}
+  .scene .tt{font-weight:700;font-size:14px}
+  .scene .ds{color:var(--sub);font-size:12px}
+  .scene .tags{display:flex;gap:6px;margin-top:4px}
+  .pill{font-size:11px;padding:2px 9px;border-radius:999px;background:var(--lav-soft);color:#8b6cc4;font-weight:700}
+  .pill.hi{background:var(--rose-soft);color:var(--rose-deep)}
+  .pill.off{background:#f3f0f2;color:#999}
+  .scene .act{display:grid;gap:6px}
+  .tl{position:relative;height:38px;background:#fff;border:1.5px solid var(--line);border-radius:12px;margin:0 0 16px;overflow:hidden}
+  .tl i{position:absolute;top:6px;bottom:6px;border-radius:6px;background:linear-gradient(135deg,#f3a4ba,#cdb6ec);opacity:.8;cursor:pointer}
+  .tl i.hi{background:linear-gradient(135deg,var(--rose),var(--lav));opacity:1}
+  .tl i.off{opacity:.25}
+  .tl i.cur{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--rose-deep)}
+  .tl .tick{position:absolute;bottom:1px;font-size:9px;color:var(--sub)}
+  .trow{display:grid;grid-template-columns:28px 78px 1fr auto;gap:12px;align-items:center;border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff;margin-bottom:8px}
+  .trow.cur{border-color:#efc3cf;background:linear-gradient(135deg,#fff5f8,#f8f3fd)}
+  .trow .tm{font-size:12px;color:var(--sub);font-variant-numeric:tabular-nums;cursor:pointer}
+  .trow .tm b{display:block;color:var(--ink)}
+  .trow textarea{width:100%;resize:none;border:1.5px solid transparent;background:transparent;font:inherit;font-size:14px;color:var(--ink);padding:4px 8px;border-radius:8px;outline:none;line-height:1.5}
+  .trow textarea:focus{border-color:var(--rose);background:#fff;box-shadow:0 0 0 3px rgba(217,116,143,.15)}
+  .trow .tools{display:flex;gap:6px;align-items:center}
+  .trow .mini{border:0;background:transparent;color:var(--sub);cursor:pointer;font-size:14px;padding:4px}
+  .trow .mini:hover{color:var(--rose-deep)}
+  .trow.off{opacity:.45}
+  .tbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;font-size:12.5px}
+  .ttl{display:grid;gap:14px}
+  .prev{aspect-ratio:9/16;width:180px;border-radius:14px;overflow:hidden;position:relative;background:#eee;border:3px solid #fff;box-shadow:0 8px 20px rgba(59,47,58,.15);flex:none}
+  .prev img{width:100%;height:100%;object-fit:cover;filter:brightness(.7)}
+  .prev .tx{position:absolute;inset:0;display:grid;place-items:center;padding:16px;text-align:center;color:#fff;font-weight:700;font-size:15px;line-height:1.5;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+  .prev.d2 .tx{align-content:end;background:linear-gradient(transparent,rgba(199,90,121,.8))}
+  .prev.d3 .tx{font-family:"Hiragino Mincho ProN",serif;letter-spacing:.1em}
+  .dl{display:grid;gap:10px}
+  .dlrow{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;background:#fff}
+  .dlrow .ico{background:var(--rose-soft)}
+  .dlrow .tt{font-weight:700}
+  .dlrow .ds{color:var(--sub);font-size:12px}
+  .share{margin-top:16px;background:var(--lav-soft);border-radius:16px;padding:14px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px}
+  /* 設定 */
+  .set{display:grid;gap:18px}
+  .set .row{display:grid;grid-template-columns:200px 1fr;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .set .row:last-child{border:0}
+  .set .row .k{font-weight:700;font-size:13.5px}
+  .set .row .k small{display:block;color:var(--sub);font-weight:400;font-size:11.5px}
+  .sw{width:46px;height:26px;border-radius:999px;background:#eadbe2;position:relative;cursor:pointer;transition:.2s;flex:none}
+  .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.2);transition:.2s}
+  .sw.on{background:linear-gradient(135deg,var(--rose),var(--lav))}
+  .sw.on::after{left:23px}
+  .planbox{background:linear-gradient(135deg,#fff5f8,#f8f3fd);border:1.5px solid #efc3cf;border-radius:16px;padding:14px 18px;display:flex;gap:14px;align-items:center}
+  .planbox b{font-size:15px}
+  .planbox .um{flex:1;height:8px;background:#f5e6eb;border-radius:8px;overflow:hidden}
+  .planbox .um i{display:block;height:100%;width:30%;background:linear-gradient(90deg,var(--rose),var(--lav))}
+
+  /* インスタ風UIオーバーレイ（見た目確認用） */
+  .igov{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .25s;color:#fff;font-size:10px}
+  .ig .igov{opacity:1}
+  .igov .top{position:absolute;left:0;right:0;top:0;padding:8px 10px;display:flex;justify-content:space-between;font-weight:700;font-size:12px;background:linear-gradient(rgba(0,0,0,.35),transparent)}
+  .igov .rail{position:absolute;right:6px;bottom:46px;display:grid;gap:11px;justify-items:center}
+  .igov .rail div{display:grid;justify-items:center;gap:1px;font-size:9px;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+  .igov .rail svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+  .igov .rail .heart.on svg{fill:#ff3b5c;stroke:#ff3b5c}
+  .igov .rail .music{width:20px;height:20px;border-radius:5px;border:2px solid #fff;background:linear-gradient(135deg,#d9748f,#b79be0)}
+  .igov .bot{position:absolute;left:0;right:0;bottom:0;padding:34px 46px 10px 10px;background:linear-gradient(transparent,rgba(0,0,0,.55));text-shadow:0 1px 3px rgba(0,0,0,.6)}
+  .igov .acc{display:flex;align-items:center;gap:5px;font-weight:700;margin-bottom:3px}
+  .igov .acc i{width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--lav));display:inline-block;font-style:normal;text-align:center;line-height:16px;font-size:9px}
+  .igov .acc{white-space:nowrap}
+  .igov .acc em{font-style:normal;border:1px solid #fff;border-radius:4px;padding:0 4px;font-size:9px}
+  .igov .cap{opacity:.95;line-height:1.4}
+  .thumb.ig .telop{bottom:86px;right:40px;font-size:12px}
+  .thumb.ig .tag,.thumb.ig .dur,.thumb.ig .play,.thumb.ig .scrub{opacity:0}
+  .prev.ig .tx{padding-bottom:70px;padding-right:36px}
+  .igbtn{margin:10px auto 0;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-weight:700;font-size:12.5px;color:var(--ink);cursor:pointer}
+  .igbtn .sw{width:30px;height:17px;border-radius:99px;background:#e7d8df;position:relative;transition:.2s}
+  .igbtn .sw::after{content:"";position:absolute;left:2px;top:2px;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:.2s}
+  .igbtn.on{border-color:var(--rose);background:var(--rose-soft)}
+  .igbtn.on .sw{background:var(--rose)}
+  .igbtn.on .sw::after{left:15px}
+  /* さやか先生アバター・POINT */
+  .avatar{width:22px;height:22px;border-radius:50%;object-fit:cover;flex:none;border:1.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+  .avatar.lg{width:72px;height:72px;border:3px solid #fff;box-shadow:0 6px 16px rgba(217,116,143,.3)}
+  .avatar.ini{display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--rose),var(--lav));color:#fff;font-weight:700;font-size:12px}
+  .avatar.lg.ini{font-size:30px}
+  .avatar.md{width:48px;height:48px;border:2px solid #fff}
+  .point{display:grid;grid-template-columns:48px 1fr auto;gap:14px;align-items:center;background:linear-gradient(135deg,#fff7f2,#fdeef2 60%,#f3edfb);border:1.5px solid #f3cfd9;border-radius:18px;padding:12px 16px;margin:0 0 16px;position:relative}
+  .point.tight{margin:14px 0 0}
+  .point .av{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2.5px solid #fff;box-shadow:0 4px 10px rgba(217,116,143,.3)}
+  .point .hd{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+  .point .hd b{font-size:12.5px;color:var(--rose-deep);letter-spacing:.06em}
+  .point .hd .pt{font-size:10px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--rose),var(--lav));padding:2px 8px;border-radius:999px;letter-spacing:.12em}
+  .point .tx{font-size:13.5px;line-height:1.6}
+  .point .tx em{font-style:normal;background:linear-gradient(transparent 55%,#ffe2a8 55%);font-weight:700}
+  .point .nx{font-size:11.5px;color:var(--sub);background:#fff;border:1.5px solid #ead4dc;border-radius:999px;padding:5px 11px;cursor:pointer;white-space:nowrap}
+  .point .nx:hover{color:var(--rose-deep)}
+  .point .dots{position:absolute;right:16px;bottom:6px;font-size:9px;color:#d9b6c3;letter-spacing:3px}
+  /* モーダル・トースト */
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:#3b2f3a;color:#fff;padding:12px 20px;border-radius:999px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .demo{position:fixed;right:14px;bottom:14px;font-size:11px;color:#b39eaa;background:rgba(255,255,255,.8);padding:4px 10px;border-radius:999px;border:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" onclick="go('home')">♪</div>
+  <h1 onclick="go('home')">AI動画編集アシスタント<small>for Piano Lesson</small></h1>
+  <nav id="nav">
+    <a data-nav="home" onclick="go('home')">マイ動画</a>
+    <a data-nav="upload" onclick="go('upload')">新しく編集する</a>
+    <a data-nav="settings" onclick="go('settings')">設定</a>
+  </nav>
+  <div class="usage" id="usageHd">今月の利用　<b>3</b> / 10本 <span class="um"><i></i></span></div>
+  <div class="plan" id="planHd" onclick="go('settings')"><span class="avatar ini">中</span>中川</div>
+</header>
+
+<div class="steps" id="steps">
+  <div class="step" data-go="upload"><div class="n">1</div><div class="t">動画をアップロード</div></div>
+  <div class="step" data-go="select"><div class="n">2</div><div class="t">やりたいことを選ぶ</div></div>
+  <div class="step" data-go="processing"><div class="n">3</div><div class="t">AIが編集</div></div>
+  <div class="step" data-go="result"><div class="n">4</div><div class="t">確認・ダウンロード</div></div>
+</div>
+
+<main id="main">
+  <!-- 左：動画プレビュー（選択・結果で表示） -->
+  <aside class="card" id="side">
+    <h2 id="sideTitle">アップロードした動画</h2>
+    <div class="thumbwrap">
+      <div class="thumb">
+        <img src="piano_lesson_9x16.jpg" alt="">
+        <div class="tag">縦型</div>
+        <div class="telop s-white" id="telopPrev" style="display:none"></div>
+        <div class="play" onclick="toast('モックアップのため再生はできません')"></div>
+        <div class="igov"><div class="top"><span>リール</span><span>📷</span></div><div class="rail"><div class="heart" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.2 3 5 6.2 5c2 0 3.4 1.1 5.8 3.4C14.400 6.100 15.800 5 17.800 5 21 5 23 8.200 21.500 11.800 19.500 16.400 12 21 12 21z"/></svg>1,284</div><div><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.500 7.200L3 20.500l1.400-5.200A8 8 0 1 1 21 12z"/></svg>56</div><div><svg viewBox="0 0 24 24"><path d="M22 3 9.500 13.500M22 3l-7 18-5.500-7.500L2 9.500 22 3z"/></svg>312</div><div><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4.500L6 21z"/></svg>保存</div><div class="music"></div></div><div class="bot"><div class="acc"><i>中</i>nakagawa_piano<em>フォロー</em></div><div class="cap">左手の伴奏を安定させる3つのコツ #ピアノ #ピアノ教室 …続きを読む</div></div></div><div class="dur" id="durLabel">12:48</div>
+        <div class="scrub" id="scrub" style="display:none"><i id="scrubFill"></i></div>
+      </div>
+    </div>
+    <button class="igbtn" id="igBtnSide" onclick="toggleIG()"><span class="sw"></span>インスタの画面で見る</button>
+    <div class="fname">レッスン動画_1023.mp4</div>
+    <div class="meta">1080×1920 ・ 12分48秒 ・ 1.2GB</div>
+    <div class="okbadge" id="sideBadge">アップロード完了</div>
+    <div class="ghost" id="sideGhost" onclick="go('upload')">＋ 別の動画に変更する</div>
+  </aside>
+
+  <!-- ログイン -->
+  <section class="screen" id="scr-login">
+    <div class="card login">
+      <span class="avatar lg ini" style="margin:0 auto 12px">中</span>
+      <h2>AI動画編集アシスタント</h2>
+      <p>さやか先生のアカデミー生専用ツールです</p>
+      <div class="f">
+        <label>メールアドレス</label><input class="inp" value="nakagawa@example.com">
+        <label>パスワード</label><input class="inp" type="password" value="••••••••••">
+        <button class="cta block" style="margin-top:6px" onclick="go('home');toast('ログインしました ♪')">ログイン</button>
+      </div>
+      <div class="note">招待された方のみ利用できます。ログイン情報はアカデミーの公式LINEからお送りしています。<br>パスワードを忘れた方は <u>こちら</u></div>
+    </div>
+  </section>
+
+  <!-- ホーム（マイ動画） -->
+  <section class="screen" id="scr-home">
+    <div>
+      <div class="hero">
+        <div style="display:flex;gap:14px;align-items:center"><span class="avatar lg ini">中</span><div><h2>こんにちは、中川さん ♪</h2><p>編集した動画はここにたまっていきます。新しい動画はいつでも追加できます。</p></div></div>
+        <button class="cta" onclick="go('upload')">＋ 新しい動画を編集する</button>
+      </div>
+      <div class="point" data-point="home"><img class="av" src="sayaka_avatar.png" alt=""><div><div class="hd"><span class="pt">POINT</span><b>さやか先生のアドバイス</b></div><div class="tx"></div></div><button class="nx" onclick="nextPoint(this)">次のPOINT →</button><div class="dots"></div></div>
+      <div class="grid" id="videoGrid"></div>
+      <div class="stat">
+        <div class="s"><small>今月の編集</small><b>3</b> / 10本<div class="um"><i style="width:30%"></i></div></div>
+        <div class="s"><small>合計で短くなった時間</small><b>11分</b> ・ 3本分</div>
+        <div class="s"><small>作ったリール</small><b>4</b> 本</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ① アップロード -->
+  <section class="screen" id="scr-upload">
+    <div>
+      <div class="drop" id="drop" onclick="fakeUpload()">
+        <div class="big">🎹</div>
+        <h3>レッスン動画をここにドロップ</h3>
+        <p>または クリックしてファイルを選ぶ　（MP4 / MOV ・ 最大 60分 ・ 4GBまで）</p>
+      </div>
+      <div class="uprog" id="uprog"><div style="display:flex;justify-content:space-between;font-size:13px"><b id="upName">レッスン動画_1023.mp4</b><span id="upPct" style="color:var(--rose-deep);font-weight:700">0%</span></div><div class="pb"><i id="upBar"></i></div><div class="lab" style="font-size:12px;margin-top:6px" id="upMsg">アップロード中…　この画面を閉じないでください</div></div>
+      <div class="point tight" data-point="upload"><img class="av" src="sayaka_avatar.png" alt=""><div><div class="hd"><span class="pt">POINT</span><b>さやか先生のアドバイス</b></div><div class="tx"></div></div><button class="nx" onclick="nextPoint(this)">次のPOINT →</button><div class="dots"></div></div>
+      <div class="hint">
+        <div><b>📱 スマホで撮った縦動画OK</b>そのまま送れます。横動画も使えます。</div>
+        <div><b>🔒 動画は先生だけが見られます</b>編集が終わって30日後に自動で削除されます。</div>
+        <div><b>⏱ 目安時間</b>10分の動画なら、編集はだいたい10〜15分で終わります。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② やりたいことを選ぶ -->
+  <section class="screen" id="scr-select">
+    <div class="card">
+      <h2>やりたいことにチェックを入れてください <small>複数選択できます</small></h2>
+      <p class="lead">チェックした作業をAIがまとめて行います。あとから修正もできます。</p>
+      <div class="point" data-point="select"><img class="av" src="sayaka_avatar.png" alt=""><div><div class="hd"><span class="pt">POINT</span><b>さやか先生のアドバイス</b></div><div class="tx"></div></div><button class="nx" onclick="nextPoint(this)">次のPOINT →</button><div class="dots"></div></div>
+      <div class="opts" id="opts">
+        <div class="opt on" data-key="scene" data-min="3">
+          <div class="cb"><span class="spark">✦</span></div><div class="ico">🎬</div>
+          <div><div class="name">シーン抽出</div><div class="desc">話題の切り替わりでシーンを分け、見どころを自動で見つけます。1つの動画から複数の動画を作りたい時に使ってください</div></div>
+          <div class="time">約3分</div>
+          <div class="sub" data-group="scene"><span class="lab">取り出したいもの：</span><span class="chip sel">見どころ</span><span class="chip">話題ごと</span></div>
+        </div>
+        <div class="opt on" data-key="telop" data-min="5">
+          <div class="cb"><span class="spark">✦</span></div><div class="ico">💬</div>
+          <div><div class="name">字幕テロップ入れ</div><div class="desc">話している内容を文字起こしして、読みやすいテロップを付けます</div></div>
+          <div class="time">約5分</div>
+          <div class="sub"><span class="lab">スタイル：</span><span class="chip sel" data-group="style">白文字＋ピンクフチ</span><span class="chip" data-group="style">黄色強調</span><span class="chip" data-group="style">シンプル</span><span class="lab" style="margin-left:8px">言い直し・「えー」は</span><span class="chip sel" data-group="filler">自動で短く</span><span class="chip" data-group="filler">そのまま</span></div>
+        </div>
+        <div class="opt on" data-key="title" data-min="1">
+          <div class="cb"><span class="spark">✦</span></div><div class="ico">🏷️</div>
+          <div><div class="name">冒頭タイトル入れ</div><div class="desc">動画の最初にタイトルカードを入れます</div></div>
+          <div class="time">約1分</div>
+          <div class="sub"><span class="lab">タイトル：</span><input class="inp" id="titleInput" value="左手の伴奏を安定させる3つのコツ"><span class="chip sel" data-group="tdesign">おまかせデザイン</span></div>
+        </div>
+        <div class="opt on" data-key="cut" data-min="4">
+          <div class="cb"><span class="spark">✦</span></div><div class="ico">✂️</div>
+          <div><div class="name">カット編集</div><div class="desc">無音・言い直し・同じ内容の撮り直しを取り除いてテンポよくします</div></div>
+          <div class="time">約4分</div>
+          <div class="sub" data-group="cut"><span class="lab">仕上がり：</span><span class="chip">ゆったり</span><span class="chip sel">ふつう</span><span class="chip">テンポ重視</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="bar">
+      <div class="sum">選んだ作業 <b id="cnt">4件</b>　／　目安時間 <b id="est">約13分</b></div>
+      <div class="note">完成したらメールとLINEでお知らせします。<br>待っている間に画面を閉じても大丈夫です。</div>
+      <button class="cta" onclick="startProcessing()">AIに編集をお願いする ♪</button>
+    </div>
+    <div class="foot">元の動画は変更されません。編集後の動画は別ファイルで保存されます。</div>
+  </section>
+
+  <!-- ③ AIが編集中 -->
+  <section class="screen" id="scr-processing">
+    <div class="card proc">
+      <div class="ring" id="ring"><b id="ringPct">0%</b></div>
+      <h3>AIが編集しています…</h3>
+      <p>この画面を閉じても大丈夫です。完成したらメールとLINEでお知らせします。</p>
+      <div class="tasks" id="tasks"></div>
+      <div style="margin-top:18px;display:flex;gap:10px;justify-content:center"><button class="btn ghostb" onclick="go('home')">マイ動画に戻って待つ</button><button class="btn ghostb" onclick="finishProcessing()">（モック）結果画面へスキップ →</button></div>
+    </div>
+  </section>
+
+  <!-- ④ 確認・ダウンロード -->
+  <section class="screen" id="scr-result">
+    <div class="card">
+      <div class="tabs" id="tabs">
+        <div class="tab on" data-tab="scenes">🎬 シーン抽出結果 <span class="cnt" id="sceneCnt">6</span></div>
+        <div class="tab" data-tab="telop">💬 テロップ編集 <span class="cnt" id="telopCnt">0</span></div>
+        <div class="tab" data-tab="title">🏷️ 冒頭タイトル</div>
+        <div class="tab" data-tab="download">⬇️ ダウンロード</div>
+      </div>
+
+      <div class="pane on" id="pane-scenes">
+        <p class="lead">話題の切り替わりで <b id="sceneTotal">6</b> つのシーンに分けました。⭐ は AI が選んだ見どころです。チェックを外すと本編から除かれます。</p>
+        <div class="point" data-point="scenes"><img class="av" src="sayaka_avatar.png" alt=""><div><div class="hd"><span class="pt">POINT</span><b>さやか先生のアドバイス</b></div><div class="tx"></div></div><button class="nx" onclick="nextPoint(this)">次のPOINT →</button><div class="dots"></div></div>
+        <div class="tl" id="tl"></div>
+        <div id="sceneList"></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+          <button class="cta sm" onclick="goTab('telop')">テロップを確認する →</button>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-telop">
+        <div class="tbar">
+          <span class="lab">スタイル：</span>
+          <span class="chip sm sel" data-style="s-white">白文字＋ピンクフチ</span><span class="chip sm" data-style="s-yellow">黄色強調</span><span class="chip sm" data-style="s-simple">シンプル</span>
+          <span style="flex:1"></span>
+          <button class="btn" onclick="shortenAll()">✨ AIに全部もう少し短くしてもらう</button>
+          <button class="btn ghostb" onclick="resetTelops()">元に戻す</button>
+        </div>
+        <p class="lead" style="margin-top:0">文字をクリックすると直接書き換えられます。行をクリックすると左のプレビューに表示されます。</p>
+        <div class="point" data-point="telop"><img class="av" src="sayaka_avatar.png" alt=""><div><div class="hd"><span class="pt">POINT</span><b>さやか先生のアドバイス</b></div><div class="tx"></div></div><button class="nx" onclick="nextPoint(this)">次のPOINT →</button><div class="dots"></div></div>
+        <div id="telopList"></div>
+        <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:10px">
+          <button class="btn ghostb" onclick="addTelop()">＋ テロップを追加</button>
+          <div style="display:flex;gap:10px"><button class="btn" onclick="toast('変更を保存しました（モック）')">保存</button><button class="cta sm" onclick="goTab('title')">冒頭タイトルを確認する →</button></div>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-title">
+        <div class="ttl">
+          <div class="point" data-point="title"><img class="av" src="sayaka_avatar.png" alt=""><div><div class="hd"><span class="pt">POINT</span><b>さやか先生のアドバイス</b></div><div class="tx"></div></div><button class="nx" onclick="nextPoint(this)">次のPOINT →</button><div class="dots"></div></div>
+          <div class="tbar"><span class="lab">タイトル：</span><input class="inp" id="titleInput2" oninput="syncTitle(this.value)"></div>
+          <div class="tbar"><span class="lab">デザイン：</span><span class="chip sm sel" data-design="d1">やわらか</span><span class="chip sm" data-design="d2">ピンク帯</span><span class="chip sm" data-design="d3">上品</span></div>
+          <div style="display:flex;gap:18px;align-items:flex-start">
+            <div class="prev d1" id="titlePrev"><img src="piano_lesson_9x16.jpg" alt=""><div class="tx" id="titleTx"></div><div class="igov"><div class="top"><span>リール</span><span>📷</span></div><div class="rail"><div class="heart" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.2 3 5 6.2 5c2 0 3.4 1.1 5.8 3.4C14.400 6.100 15.800 5 17.800 5 21 5 23 8.200 21.500 11.800 19.500 16.400 12 21 12 21z"/></svg>1,284</div><div><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.500 7.200L3 20.500l1.400-5.200A8 8 0 1 1 21 12z"/></svg>56</div><div><svg viewBox="0 0 24 24"><path d="M22 3 9.500 13.500M22 3l-7 18-5.500-7.500L2 9.500 22 3z"/></svg>312</div><div><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4.500L6 21z"/></svg>保存</div><div class="music"></div></div><div class="bot"><div class="acc"><i>中</i>nakagawa_piano<em>フォロー</em></div><div class="cap">左手の伴奏を安定させる3つのコツ #ピアノ #ピアノ教室 …続きを読む</div></div></div></div>
+            <div style="color:var(--sub);font-size:12.5px;line-height:1.8">最初の3秒間に表示されます。<br>タイトルはあとから何度でも変えられます。<br><br><button class="igbtn" id="igBtnTitle" onclick="toggleIG()" style="margin:0 0 14px"><span class="sw"></span>インスタの画面で見る</button><br><button class="cta sm" onclick="goTab('download')">ダウンロードへ →</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-download">
+        <p class="lead">編集が完了しました。必要なものをダウンロードしてください。</p>
+        <div class="point" data-point="download"><img class="av" src="sayaka_avatar.png" alt=""><div><div class="hd"><span class="pt">POINT</span><b>さやか先生のアドバイス</b></div><div class="tx"></div></div><button class="nx" onclick="nextPoint(this)">次のPOINT →</button><div class="dots"></div></div>
+        <div class="dl">
+          <div class="dlrow"><div class="ico">🎞️</div><div><div class="tt">完成動画（カット・テロップ・タイトル入り）</div><div class="ds" id="dlMain">1080×1920 ・ 9分12秒 ・ 約640MB</div></div><button class="cta sm" onclick="toast('モックアップのためファイルはダウンロードされません')">ダウンロード</button></div>
+          <div class="dlrow"><div class="ico">📝</div><div><div class="tt">字幕ファイル（SRT）</div><div class="ds">他のアプリでも読み込める字幕データです</div></div><button class="btn" onclick="toast('モックアップのためファイルはダウンロードされません')">ダウンロード</button></div>
+          <div class="dlrow"><div class="ico">✂️</div><div><div class="tt">シーンごとの分割動画（ZIP）</div><div class="ds" id="dlZip">6ファイル ・ 約620MB</div></div><button class="btn" onclick="toast('モックアップのためファイルはダウンロードされません')">ダウンロード</button></div>
+        </div>
+        <div class="share"><b>🔗 共有リンク</b><span class="inp" style="min-width:0;flex:1;font-size:12px;color:var(--sub)">https://edit.example.com/v/8f3k2a（7日間有効・パスワードなし）</span><button class="btn" onclick="toast('リンクをコピーしました（モック）')">コピー</button><button class="btn ghostb" onclick="toast('LINEで送る画面を開きます（モック）')">LINEで送る</button></div>
+        <div class="foot" style="margin-top:16px">編集前の動画はそのまま残っています。気に入らなければ「やりたいことを選ぶ」からやり直せます。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 設定 -->
+  <section class="screen" id="scr-settings">
+    <div class="card">
+      <h2>設定</h2>
+      <div class="planbox"><div><b>アカデミー生プラン</b><br><small class="lab">今月の編集　3 / 10本　（11月1日にリセット）</small></div><div class="um"><i></i></div><button class="btn" onclick="toast('追加の相談はアカデミーの公式LINEへ（モック）')">本数を増やしたい</button></div>
+      <div class="set" style="margin-top:8px">
+        <div class="row"><div class="k">テロップの初期スタイル<small>新しい動画でまず使うスタイル</small></div><div class="tbar" style="margin:0"><span class="chip sm sel" data-group="defstyle">白文字＋ピンクフチ</span><span class="chip sm" data-group="defstyle">黄色強調</span><span class="chip sm" data-group="defstyle">シンプル</span></div></div>
+        <div class="row"><div class="k">言い直し・「えー」<small>テロップから自動で省く</small></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="row"><div class="k">カット編集の仕上がり</div><div class="tbar" style="margin:0"><span class="chip sm" data-group="defcut">ゆったり</span><span class="chip sm sel" data-group="defcut">ふつう</span><span class="chip sm" data-group="defcut">テンポ重視</span></div></div>
+        <div class="row"><div class="k">完成のお知らせ</div><div class="tbar" style="margin:0;gap:14px"><label style="display:flex;gap:6px;align-items:center"><div class="sw on" onclick="this.classList.toggle('on')"></div>メール</label><label style="display:flex;gap:6px;align-items:center"><div class="sw on" onclick="this.classList.toggle('on')"></div>LINE</label></div></div>
+        <div class="row"><div class="k">動画の自動削除<small>編集完了から</small></div><div class="tbar" style="margin:0"><span class="chip sm" data-group="keep">7日</span><span class="chip sm sel" data-group="keep">30日</span><span class="chip sm" data-group="keep">90日</span></div></div>
+        <div class="row"><div class="k">名前の表示<small>タイトルカードの署名に使います</small></div><input class="inp" value="中川のピアノ教室"></div>
+        <div class="row"><div class="k">ログイン</div><div class="tbar" style="margin:0"><span class="lab">nakagawa@example.com</span><button class="btn ghostb" onclick="toast('パスワード変更メールを送りました（モック）')">パスワードを変える</button><button class="btn ghostb" onclick="go('login')">ログアウト</button></div></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="cta sm" onclick="toast('設定を保存しました ♪')">保存する</button></div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="demo">モックアップ：裏側の処理は動きません</div>
+
+<script>
+/* ---------- データ（ダミー） ---------- */
+const DUR = 768; // 12:48
+const SCENES = [
+  {s:0,   e:62,  t:'ごあいさつ・今日のテーマ',          d:'「左手の伴奏が安定しない」という相談から',      hi:false, on:true, k:'導入'},
+  {s:62,  e:171, t:'コツ①：手首の高さをそろえる',        d:'実演しながら、低くなりがちな手首を直す',        hi:true,  on:true, k:'実演'},
+  {s:171, e:302, t:'生徒さんが弾いてみる',              d:'ゆっくりのテンポで左手だけ練習',               hi:false, on:true, k:'生徒'},
+  {s:302, e:418, t:'コツ②：ベース音を先に歌う',          d:'声に出してから弾くと迷わない',                 hi:true,  on:true, k:'実演'},
+  {s:418, e:570, t:'コツ③：メトロノームは2拍に1回',       d:'4分音符より2分音符で合わせると余裕が出る',      hi:true,  on:true, k:'実演'},
+  {s:570, e:768, t:'まとめ・次回の宿題',                d:'3つのコツを順番におさらい',                    hi:false, on:true, k:'まとめ'},
+];
+const TELOPS0 = [
+  {s:3,   e:7,   x:'今日は左手の伴奏を安定させる3つのコツをお話しします'},
+  {s:64,  e:69,  x:'えーっと、まず1つ目は手首の高さです'},
+  {s:70,  e:75,  x:'手首が下がると、音が重くなって遅れやすいんですね'},
+  {s:173, e:178, x:'じゃあ、ゆっくり左手だけ弾いてみましょうか'},
+  {s:305, e:310, x:'2つ目のコツは、ベースの音を先に歌ってから弾く、ということです'},
+  {s:420, e:425, x:'3つ目は、メトロノームを2拍に1回にしてみてください'},
+  {s:572, e:577, x:'はい、今日のまとめです。3つのコツ、覚えていますか？'},
+];
+const VIDEOS = [
+  {n:'左手の伴奏を安定させる3つのコツ', d:'10/23', len:'12:48', st:'new',   stt:'今日アップロード'},
+  {n:'スタッカートのコツ（4歳〜）',     d:'10/18', len:'08:21', st:'doing', stt:'AIが編集中'},
+  {n:'発表会に向けて：緊張しない練習法', d:'10/11', len:'15:02', st:'done',  stt:'完了'},
+  {n:'両手で弾けるようになる順番',       d:'10/04', len:'11:37', st:'done',  stt:'完了'},
+  {n:'メトロノームの使い方',            d:'09/27', len:'06:55', st:'done',  stt:'完了'},
+];
+let telops = JSON.parse(JSON.stringify(TELOPS0));
+let curScene = 1, curTelop = 0, telopStyle = 's-white';
+
+const fmt = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+const $ = id => document.getElementById(id);
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('on'),2400); }
+
+/* ---------- 画面遷移 ---------- */
+const FLOW = {upload:1, select:2, processing:3, result:4};
+function go(name, tab){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.id==='scr-'+name));
+  const idx = FLOW[name];
+  $('steps').classList.toggle('hide', !idx);
+  document.querySelectorAll('#steps .step').forEach((st,i)=>{ st.classList.toggle('done', i+1<idx); st.classList.toggle('now', i+1===idx); });
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on', a.dataset.nav===name || (a.dataset.nav==='upload' && idx)));
+  const isLogin = name==='login';
+  $('nav').classList.toggle('hide', isLogin); $('usageHd').classList.toggle('hide', isLogin); $('planHd').classList.toggle('hide', isLogin);
+  const withSide = name==='select' || name==='result';
+  $('side').classList.toggle('hide', !withSide);
+  $('main').className = withSide ? '' : (name==='home' ? 'wide top' : 'one top');
+  const inResult = name==='result';
+  $('sideTitle').textContent = inResult ? '編集後のプレビュー' : 'アップロードした動画';
+  $('sideBadge').textContent = inResult ? '編集完了' : 'アップロード完了';
+  $('sideGhost').classList.toggle('hide', inResult);
+  $('scrub').style.display = inResult ? '' : 'none';
+  $('telopPrev').style.display = 'none';
+  if(name==='home') renderHome();
+  if(inResult) goTab(tab||'scenes');
+  location.hash = name + (tab?'/'+tab:'');
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('#steps .step').forEach(st=>st.onclick=()=>{ st.dataset.go==='processing' ? startProcessing() : go(st.dataset.go); });
+
+/* ---------- ホーム ---------- */
+function renderHome(){
+  $('videoGrid').innerHTML = `<div class="vcard new" onclick="go('upload')"><div><b>＋</b>新しい動画を<br>編集する</div></div>` + VIDEOS.map((v,i)=>`
+    <div class="vcard" onclick="${v.st==='doing' ? "startProcessing(55)" : (v.st==='new' ? "go('select')" : "go('result','download')")}">
+      <div class="vt"><img src="piano_lesson_9x16.jpg" style="object-position:${(i*25)%100}% 30%;filter:hue-rotate(${i*6}deg)"><span class="st ${v.st}">${v.stt}</span><span class="dur">${v.len}</span></div>
+      <div class="vb"><b>${v.n}</b><span>${v.d} アップロード</span></div>
+    </div>`).join('');
+}
+
+/* ---------- ① アップロード（見た目だけ） ---------- */
+let upTimer;
+function fakeUpload(){
+  const u=$('uprog'); u.classList.add('on'); let p=0; clearInterval(upTimer);
+  upTimer=setInterval(()=>{ p+=7; if(p>=100){ p=100; clearInterval(upTimer); $('upMsg').textContent='アップロード完了 ♪　次へ進みます…'; setTimeout(()=>go('select'),700); }
+    $('upPct').textContent=p+'%'; $('upBar').style.width=p+'%'; }, 90);
+}
+const dz=$('drop'); ['dragenter','dragover'].forEach(e=>dz.addEventListener(e,ev=>{ev.preventDefault();dz.classList.add('over')})); ['dragleave','drop'].forEach(e=>dz.addEventListener(e,ev=>{ev.preventDefault();dz.classList.remove('over'); if(e==='drop') fakeUpload();}));
+
+/* ---------- ② 選択 ---------- */
+function refreshSum(){
+  let n=0, m=0;
+  document.querySelectorAll('#opts .opt').forEach(o=>{ if(o.classList.contains('on')){ n++; m+= +o.dataset.min; } });
+  $('cnt').textContent = n+'件'; $('est').textContent = '約'+m+'分';
+}
+document.querySelectorAll('#opts .opt').forEach(o=>{
+  o.addEventListener('click', e=>{ if(e.target.closest('.sub')) return; o.classList.toggle('on'); refreshSum(); });
+});
+document.addEventListener('click', e=>{
+  const c = e.target.closest('.chip'); if(!c) return;
+  const g = c.dataset.group || c.parentElement.dataset.group;
+  if(g){ const sib = c.dataset.group ? c.parentElement.querySelectorAll(`.chip[data-group="${g}"]`) : c.parentElement.querySelectorAll('.chip'); sib.forEach(x=>x.classList.remove('sel')); }
+  if(c.dataset.style){ c.parentElement.querySelectorAll('.chip[data-style]').forEach(x=>x.classList.remove('sel')); telopStyle=c.dataset.style; renderTelopPrev(); }
+  if(c.dataset.design){ c.parentElement.querySelectorAll('.chip[data-design]').forEach(x=>x.classList.remove('sel')); $('titlePrev').className='prev '+c.dataset.design+(igOn?' ig':''); }
+  c.classList.add('sel');
+});
+
+/* ---------- ③ 処理中（見た目だけ） ---------- */
+let procTimer;
+function startProcessing(startPct){
+  const sel=[...document.querySelectorAll('#opts .opt.on')].map(o=>({key:o.dataset.key, name:o.querySelector('.name').textContent, min:+o.dataset.min}));
+  if(!sel.length){ toast('やりたいことを1つ以上選んでください'); return; }
+  $('tasks').innerHTML = sel.map((t,i)=>`<div class="task" id="task${i}"><div class="st">${i+1}</div><div><div class="lab">${t.name}</div><div class="pb"><i></i></div></div><div class="pct">0%</div></div>`).join('');
+  go('processing');
+  const total=sel.length*100; let step=startPct? Math.round(total*startPct/100) : 0;
+  const paint=()=>{
+    const i=Math.min(sel.length-1, Math.floor(step/100)); const p=Math.min(100, step-i*100);
+    sel.forEach((t,k)=>{ const el=$('task'+k); if(!el) return; const done=k<i||(k===i&&p>=100); el.className='task'+(done?' done':(k===i?' doing':'')); el.querySelector('.st').textContent=done?'✓':(k===i?'…':k+1); const w=done?100:(k===i?p:0); el.querySelector('.pb i').style.width=w+'%'; el.querySelector('.pct').textContent=w+'%'; });
+    const all=Math.min(100, Math.round(step/total*100)); $('ring').style.setProperty('--p', all+'%'); $('ringPct').textContent=all+'%';
+  };
+  paint(); clearInterval(procTimer);
+  procTimer=setInterval(()=>{ step+=6; paint(); if(step>=total){ clearInterval(procTimer); setTimeout(finishProcessing, 600); } }, 140);
+}
+function finishProcessing(){ clearInterval(procTimer); go('result','scenes'); toast('編集が完了しました ♪'); }
+
+/* ---------- ④ 結果：シーン ---------- */
+function renderScenes(){
+  $('tl').innerHTML = SCENES.map((s,i)=>`<i class="${s.hi?'hi':''} ${s.on?'':'off'} ${i===curScene?'cur':''}" style="left:${s.s/DUR*100}%;width:${(s.e-s.s)/DUR*100-0.4}%" title="${s.t}" onclick="selScene(${i})"></i>`).join('')
+    + [0,180,360,540,720].map(t=>`<span class="tick" style="left:${t/DUR*100}%">${fmt(t)}</span>`).join('');
+  $('sceneList').innerHTML = SCENES.map((s,i)=>`
+    <div class="scene ${i===curScene?'cur':''}" onclick="selScene(${i})">
+      <div class="cb sm ${s.on?'on':''}" onclick="event.stopPropagation();toggleScene(${i})"><span class="spark">✦</span></div>
+      <div class="sth"><img src="piano_lesson_9x16.jpg" style="object-position:${(i*20)%100}% ${(i*33)%100}%;filter:hue-rotate(${i*8}deg)"><span>${fmt(s.e-s.s)}</span></div>
+      <div><div class="tt">${s.hi?'⭐ ':''}${s.t}</div><div class="ds">${fmt(s.s)} 〜 ${fmt(s.e)}　${s.d}</div>
+        <div class="tags">${s.hi?'<span class="pill hi">見どころ</span>':''}<span class="pill">${s.k}</span>${s.on?'':'<span class="pill off">本編から除外</span>'}</div></div>
+      <div class="act"><button class="btn" onclick="event.stopPropagation();selScene(${i});toast('${fmt(s.s)} から再生（モック）')">▶ ここから再生</button><button class="btn ghostb" onclick="event.stopPropagation();toast('この区間を単体で書き出しキューに入れました（モック）')">単体で書き出す</button></div>
+    </div>`).join('');
+  const onN=SCENES.filter(s=>s.on).length, onSec=SCENES.filter(s=>s.on).reduce((a,s)=>a+(s.e-s.s),0)*0.72|0;
+  $('sceneCnt').textContent=SCENES.length; $('sceneTotal').textContent=SCENES.length;
+  $('dlMain').textContent=`1080×1920 ・ ${fmt(onSec)} ・ 約${Math.round(onSec*1.16)}MB`; $('dlZip').textContent=`${onN}ファイル ・ 約${Math.round(onN*103)}MB`;
+  $('scrubFill').style.width=(SCENES[curScene].s/DUR*100+2)+'%'; $('durLabel').textContent=fmt(SCENES[curScene].s)+' / 12:48';
+}
+function selScene(i){ curScene=i; renderScenes(); }
+function toggleScene(i){ SCENES[i].on=!SCENES[i].on; renderScenes(); }
+
+/* ---------- ④ 結果：テロップ ---------- */
+function renderTelops(){
+  $('telopList').innerHTML = telops.map((t,i)=>`
+    <div class="trow ${i===curTelop?'cur':''} ${t.off?'off':''}" onclick="curTelop=${i};renderTelopPrev();renderTelopsSoft()">
+      <div class="cb sm ${t.off?'':'on'}" onclick="event.stopPropagation();telops[${i}].off=!telops[${i}].off;renderTelops()"></div>
+      <div class="tm" onclick="event.stopPropagation();toast('${fmt(t.s)} から再生（モック）')"><b>${fmt(t.s)}</b>〜 ${fmt(t.e)}</div>
+      <textarea rows="1" oninput="telops[${i}].x=this.value;curTelop=${i};renderTelopPrev();autoH(this)" onfocus="curTelop=${i};renderTelopPrev();renderTelopsSoft()">${t.x}</textarea>
+      <div class="tools"><button class="mini" title="AIに短くしてもらう" onclick="event.stopPropagation();shortenOne(${i})">✨</button><button class="mini" title="2行に分ける" onclick="event.stopPropagation();splitOne(${i})">⤵</button><button class="mini" title="削除" onclick="event.stopPropagation();telops.splice(${i},1);if(curTelop>=telops.length)curTelop=telops.length-1;renderTelops()">🗑</button></div>
+    </div>`).join('');
+  document.querySelectorAll('#telopList textarea').forEach(autoH);
+  $('telopCnt').textContent = telops.filter(t=>!t.off).length;
+  renderTelopPrev();
+}
+function renderTelopsSoft(){ document.querySelectorAll('#telopList .trow').forEach((r,i)=>r.classList.toggle('cur',i===curTelop)); }
+
+let igOn=false; if(/[?&]ig=1/.test(location.search)) setTimeout(()=>toggleIG(true),50);
+function toggleIG(on){ igOn = (typeof on==='boolean')? on : !igOn;
+  document.querySelectorAll('.thumb,#titlePrev').forEach(e=>e.classList.toggle('ig',igOn));
+  document.querySelectorAll('.igbtn').forEach(b=>b.classList.toggle('on',igOn)); }
+function renderTelopPrev(){ const t=telops[curTelop]; const el=$('telopPrev'); if(!t){ el.textContent=''; return; } el.className='telop '+telopStyle; el.textContent=t.off?'':t.x; $('scrubFill').style.width=(t.s/DUR*100+2)+'%'; $('durLabel').textContent=fmt(t.s)+' / 12:48'; }
+function autoH(ta){ ta.style.height='auto'; ta.style.height=ta.scrollHeight+'px'; }
+const FILLERS=/(えーっと、|えーと、|えー、|あのー、|まあ、|じゃあ、|はい、|、ということです|ということです|んですね|してみてください)/g;
+function shorten(x){ let y=x.replace(FILLERS, m=>(m==='してみてください'?'する':'')).replace(/、$/,'').trim(); return y||x; }
+function shortenOne(i){ const b=telops[i].x; telops[i].x=shorten(b); if(telops[i].x===b) toast('これ以上短くできる言い回しはありません'); else toast('AIが短くしました：「'+telops[i].x+'」'); curTelop=i; renderTelops(); }
+function shortenAll(){ let n=0; telops.forEach(t=>{ const y=shorten(t.x); if(y!==t.x){ t.x=y; n++; } }); renderTelops(); toast(n? `${n}件のテロップを短くしました` : '短くできる言い回しはありませんでした'); }
+function splitOne(i){ const t=telops[i]; const mid=Math.round((t.s+t.e)/2); const cut=Math.ceil(t.x.length/2); telops.splice(i,1,{s:t.s,e:mid,x:t.x.slice(0,cut)},{s:mid,e:t.e,x:t.x.slice(cut)}); curTelop=i; renderTelops(); toast('2行に分けました'); }
+function addTelop(){ const last=telops[telops.length-1]; telops.push({s:(last?last.e:0)+2,e:(last?last.e:0)+6,x:''}); curTelop=telops.length-1; renderTelops(); const tas=document.querySelectorAll('#telopList textarea'); tas[tas.length-1].focus(); }
+function resetTelops(){ telops=JSON.parse(JSON.stringify(TELOPS0)); curTelop=0; renderTelops(); toast('AIが作った最初の状態に戻しました'); }
+
+/* ---------- ④ 結果：タイトル・タブ ---------- */
+function syncTitle(v){ $('titleTx').textContent=v; $('titleInput').value=v; }
+function goTab(name){
+  document.querySelectorAll('#tabs .tab').forEach(t=>t.classList.toggle('on', t.dataset.tab===name));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on', p.id==='pane-'+name));
+  if(name==='scenes') renderScenes();
+  if(name==='telop') renderTelops();
+  if(name==='title'){ $('titleInput2').value=$('titleInput').value; syncTitle($('titleInput').value); }
+  $('telopPrev').style.display = name==='telop' ? '' : 'none';
+  location.hash='result/'+name;
+}
+document.querySelectorAll('#tabs .tab').forEach(t=>t.onclick=()=>goTab(t.dataset.tab));
+
+/* ---------- さやか先生のPOINT ---------- */
+const POINTS = {
+  home:    ['週に<em>1本</em>でOK。続けることが近隣ママに届く一番の近道です','反応が良かった動画は、<em>同じ型</em>でもう一本つくると伸びやすいです','生徒さんの<em>Before→After</em>が入った動画は保存率が高いです'],
+  upload:  ['スマホの<em>縦撮り</em>でそのままOK。横動画も使えます','<em>生徒さんの手元</em>が映っていると、保護者の方の反応が2倍になります','レッスンの<em>最初と最後</em>は必ず録っておきましょう。まとめに使えます'],
+  select:  ['初めてなら<em>「シーン抽出＋テロップ」</em>だけで十分。慣れたらタイトルも','カット編集は<em>「ふつう」</em>がおすすめ。テンポ重視は上級者向けです','タイトルには<em>数字</em>を入れると反応が上がります（例：3つのコツ）'],
+  scenes:  ['⭐の見どころは<em>「できなかった→できた」</em>が入る区間。保護者の心が動きます','リールは<em>1本1メッセージ</em>。コツを3つ入れると長くなります','生徒さんが弾くシーンは<em>顔が映らない角度</em>か、許可を取ってから使いましょう'],
+  telop:   ['テロップは<em>1行15文字まで</em>。スマホで読めるのはそのくらいです','「えー」「あのー」は消して、<em>専門用語はひらがな</em>に。ママ向けはやさしく','大事な言葉は<em>テロップでも繰り返す</em>と、音なしで見ても伝わります'],
+  title:   ['タイトルは<em>「数字＋悩み」</em>。「3つのコツ」「5分で」が近隣ママに刺さります','<em>誰向けか</em>を入れると選ばれます（例：4歳からできる〜）','デザインは<em>ピンク帯</em>が目を引きやすく、フィードで止まってもらえます'],
+  download:['投稿は<em>平日21時台</em>が見られやすいです','1本目のコメントに<em>教室の公式LINE</em>のリンクを貼りましょう','完成した動画は<em>インスタのリール</em>へ。保存したくなる一言をキャプションに'],
+};
+function renderPoints(){ document.querySelectorAll('.point').forEach(el=>{ const k=el.dataset.point, i=+(el.dataset.i||0), arr=POINTS[k]||[]; el.querySelector('.tx').innerHTML=arr[i%arr.length]||''; el.querySelector('.dots').textContent=arr.map((_,j)=>j===i%arr.length?'●':'○').join(''); }); }
+function nextPoint(btn){ const el=btn.closest('.point'); el.dataset.i=(+(el.dataset.i||0)+1); renderPoints(); }
+renderPoints();
+
+/* ---------- 起動（URLの #画面名 で直接開ける） ---------- */
+refreshSum();
+(function(){
+  const h=location.hash.replace('#','').split('/');
+  if(h[0]==='processing'){ startProcessing(h[1]? +h[1] : 0); }
+  else if(h[0]==='result'){ go('result', h[1]||'scenes'); }
+  else if(['home','upload','select','settings','login'].includes(h[0])){ go(h[0]); }
+  else go('login');
+})();
+</script>
+</body>
+</html>
